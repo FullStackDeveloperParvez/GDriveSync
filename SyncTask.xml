@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-16"?>
+<!--
+  SyncTask.xml  –  Import into Windows Task Scheduler for automatic sync.
+
+  HOW TO IMPORT:
+    1. Open Task Scheduler  (search "Task Scheduler" in Start Menu)
+    2. Action → Import Task…
+    3. Browse to this file and click Open.
+    4. Edit "WorkingDirectory" and the two argument paths to match your setup.
+    5. Click OK – it will ask for your Windows password to save.
+
+  OR run from an elevated Command Prompt:
+    schtasks /Create /XML "SyncTask.xml" /TN "GoogleDriveDocSync"
+-->
+<Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Description>Syncs local Documents folder with Google Drive every hour.</Description>
+    <URI>\GoogleDriveDocSync</URI>
+  </RegistrationInfo>
+
+  <Triggers>
+    <!-- Runs every 1 hour, starting at logon, indefinitely -->
+    <LogonTrigger>
+      <Enabled>true</Enabled>
+      <Repetition>
+        <Interval>PT1H</Interval>
+        <StopAtDurationEnd>false</StopAtDurationEnd>
+      </Repetition>
+    </LogonTrigger>
+  </Triggers>
+
+  <Principals>
+    <Principal id="Author">
+      <LogonType>InteractiveToken</LogonType>
+      <RunLevel>LeastPrivilege</RunLevel>
+    </Principal>
+  </Principals>
+
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <ExecutionTimeLimit>PT2H</ExecutionTimeLimit>
+    <Priority>7</Priority>
+  </Settings>
+
+  <Actions Context="Author">
+    <Exec>
+      <Command>powershell.exe</Command>
+      <!-- !! Update the path below to where you saved Sync-GoogleDrive.ps1 !! -->
+      <Arguments>-NoProfile -ExecutionPolicy Bypass -File "C:\Users\YourName\Scripts\Sync-GoogleDrive.ps1" -Mode bisync</Arguments>
+      <WorkingDirectory>C:\Users\YourName\Scripts</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>
